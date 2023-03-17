@@ -1,2 +1,2 @@
 all:
-	g++ -std=c++11 -Wall -Werror main.cpp -o main
+	g++ -std=c++11 -Wall -Werror -g main.cpp -o main

@@ -7,11 +7,11 @@
 
 using namespace std;
 
-bool can_pass(int x1, int y1, int p1, int x2, int y2) {
+bool can_pass(int x1, int y1, int p, int x2, int y2) {
     int dx = x1 - x2;
     int dy = y1 - y2;
     int squared_distance = dx * dx + dy * dy;
-    return squared_distance <= p1 * p1;
+    return squared_distance <= p;
 }
 
 vector<vector<bool>> build_adjacency_matrix(const vector<tuple<int, int, int>>& kids) {
