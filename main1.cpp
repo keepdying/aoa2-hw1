@@ -51,15 +51,15 @@ void write_adjacency_matrix_to_file(const vector<vector<bool>>& adjacency_matrix
     output.close();
 }
 
-int bfs(const vector<vector<bool>>& adjacency_matrix, int source, int target, const string& filename) {
+void bfs(const vector<vector<bool>>& adjacency_matrix, int source, int target, const string& filename) {
     int n = adjacency_matrix.size();
     vector<bool> visited(n, false);
-    vector<int> distance(n, -1);
+    // vector<int> distance(n, -1);
+    int distance = -1;
     vector<int> parent(n, -1);
 
     queue<int> q;
     visited[source] = true;
-    distance[source] = 0;
     q.push(source);
 
     while (!q.empty()) {
@@ -70,12 +70,14 @@ int bfs(const vector<vector<bool>>& adjacency_matrix, int source, int target, co
             ofstream output(filename);
 
             output << "BFS:" << endl;
-            output << distance[current] << " ";
 
             stack<int> path;
             for (int v = target; v != -1; v = parent[v]) {
                 path.push(v);
+                distance += 1;
             }
+
+            output << distance << " ";
 
             while (!path.empty()) {
                 output << path.top() << "->";
@@ -85,46 +87,51 @@ int bfs(const vector<vector<bool>>& adjacency_matrix, int source, int target, co
             output << "  " << endl;
 
             output.close();
-            return distance[current];
-        }
-
-        for (int i = 0; i < n; ++i) {
-            if (adjacency_matrix[current][i] && !visited[i]) {
-                visited[i] = true;
-                distance[i] = distance[current] + 1;
-                parent[i] = current;
-                q.push(i);
+            return;
+        } else {
+            for (int i = 0; i < n; ++i) {
+                if (adjacency_matrix[current][i] && !visited[i]) {
+                    visited[i] = true;
+                    parent[i] = current;
+                    q.push(i);
+                }
             }
         }
     }
 
-    return -1;
+    return;
 }
 
-bool dfs_util(const vector<vector<bool>>& adjacency_matrix, int node, int target, vector<bool>& visited, vector<int>& path) {
-    visited[node] = true;
+bool dfs_util(const vector<vector<bool>>& adjacency_matrix, int node, int target, vector<bool>& visited, vector<int>& path, bool is_start_node = true) {
+    if (!is_start_node) {
+        visited[node] = true;
+    }
     path.push_back(node);
 
+    if (node == target && path.size() > 2) {
+        return true;
+    }
+
+    bool found_cycle = false;
     for (int i = 0; i < adjacency_matrix.size(); ++i) {
-        if (adjacency_matrix[node][i]) {
-            if (i == target && path.size() > 2) {
-                path.push_back(i);
-                return true;
-            } else if (!visited[i] && dfs_util(adjacency_matrix, i, target, visited, path)) {
-                return true;
+        if (adjacency_matrix[node][i] && (!visited[i] || (i == target && !is_start_node && path.size() > 2))) {
+            if (i == target && path.size() < 3) {
+                continue;
+            }
+            found_cycle = dfs_util(adjacency_matrix, i, target, visited, path, false);
+            if (found_cycle) {
+                break;
             }
         }
     }
 
-    if (path.back() == target && path.size() > 2) {
-        return true;
-    } else {
+    if (!found_cycle) {
         path.pop_back();
-        visited[node] = false;
-        return false;
     }
-}
+    visited[node] = false;
 
+    return found_cycle;
+}
 
 
 vector<int> dfs(const vector<vector<bool>>& adjacency_matrix, int source, const string& filename) {
@@ -138,6 +145,7 @@ vector<int> dfs(const vector<vector<bool>>& adjacency_matrix, int source, const 
     output << "DFS:" << endl;
 
     if (!path.empty()) {
+        output << (path.size() - 1) << " ";
         for (int node : path) {
             output << node << "->";
         }
@@ -184,7 +192,7 @@ int main(int argc, char* argv[]) {
     write_adjacency_matrix_to_file(adjacency_matrix, "graph.txt");
 
     // 2.2 Breadth First Search
-    int min_passes = bfs(adjacency_matrix, source, target, "bfs.txt");
+    bfs(adjacency_matrix, source, target, "bfs.txt");
 
     // 2.3 Depth First Search
     vector<int> path = dfs(adjacency_matrix, source, "dfs.txt");

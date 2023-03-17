@@ -3,7 +3,7 @@
     blocker: true
 
 - build:
-    run: g++ -std=c++11 -Wall -Werror main.cpp -o main  # timeout: 2
+    run: g++ -std=c++11 -Wall -Werror main1.cpp -o main  # timeout: 2
     blocker: true
 
 - case_run1:

@@ -1,5 +1,10 @@
 {
     "files.associations": {
-        "vector": "cpp"
+        "vector": "cpp",
+        "filesystem": "cpp",
+        "tuple": "cpp"
+    },
+    "files.watcherExclude": {
+        "**/target": true
     }
 }
