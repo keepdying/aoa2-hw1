@@ -101,48 +101,56 @@ int bfs(const vector<vector<bool>>& adjacency_matrix, int source, int target, co
     return -1;
 }
 
-bool dfs_util(const vector<vector<bool>>& adjacency_matrix, int node, int target, vector<bool>& visited, stack<int>& path) {
+bool dfs_util(const vector<vector<bool>>& adjacency_matrix, int node, int target, vector<bool>& visited, vector<int>& path) {
     visited[node] = true;
-    path.push(node);
-
-    if (node == target && path.size() > 1) {
-        return true;
-    }
+    path.push_back(node);
 
     for (int i = 0; i < adjacency_matrix.size(); ++i) {
-        if (adjacency_matrix[node][i] && !visited[i]) {
-            if (dfs_util(adjacency_matrix, i, target, visited, path)) {
+        if (adjacency_matrix[node][i]) {
+            if (i == target && path.size() > 2) {
+                path.push_back(i);
+                return true;
+            } else if (!visited[i] && dfs_util(adjacency_matrix, i, target, visited, path)) {
                 return true;
             }
         }
     }
 
-    path.pop();
-    return false;
+    if (path.back() == target && path.size() > 2) {
+        return true;
+    } else {
+        path.pop_back();
+        visited[node] = false;
+        return false;
+    }
 }
 
-stack<int> dfs(const vector<vector<bool>>& adjacency_matrix, int source, const string& filename) {
+
+
+vector<int> dfs(const vector<vector<bool>>& adjacency_matrix, int source, const string& filename) {
     int n = adjacency_matrix.size();
     vector<bool> visited(n, false);
-    stack<int> path;
+    vector<int> path;
 
-    if (dfs_util(adjacency_matrix, source, source, visited, path)) {
-        ofstream output(filename);
+    dfs_util(adjacency_matrix, source, source, visited, path);
 
-        output << "DFS:" << endl;
+    ofstream output(filename);
+    output << "DFS:" << endl;
 
-        while (!path.empty()) {
-            output << path.top() << "->";
-            path.pop();
+    if (!path.empty()) {
+        for (int node : path) {
+            output << node << "->";
         }
         output.seekp(-2, output.cur);
         output << "  " << endl;
-
-        output.close();
+    } else {
+        output << "-1" << endl;
     }
 
+    output.close();
     return path;
 }
+
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
@@ -179,7 +187,7 @@ int main(int argc, char* argv[]) {
     int min_passes = bfs(adjacency_matrix, source, target, "bfs.txt");
 
     // 2.3 Depth First Search
-    stack<int> path = dfs(adjacency_matrix, source, "dfs.txt");
+    vector<int> path = dfs(adjacency_matrix, source, "dfs.txt");
 
     return 0;
 }
