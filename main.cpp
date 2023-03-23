@@ -7,42 +7,158 @@
 
 using namespace std;
 
-bool can_pass(int x1, int y1, int p, int x2, int y2) {
+bool can_pass(int x1, int y1, int p1, int x2, int y2) {
     int dx = x1 - x2;
     int dy = y1 - y2;
     int squared_distance = dx * dx + dy * dy;
-    return squared_distance <= p;
+    return squared_distance <= p1;
 }
 
 vector<vector<bool>> build_adjacency_matrix(const vector<tuple<int, int, int>>& kids) {
     int n = kids.size();
     vector<vector<bool>> adjacency_matrix(n, vector<bool>(n, false));
-    
-    for (int i = 0; i < n; i++) {
-        for (int j = i + 1; j < n; j++) {
 
-            int k1_x, k1_y, k1_p;
-            tie(k1_x, k1_y, k1_p) = kids[i];
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            if (i == j) continue;
 
-            int k2_x, k2_y, k2_p;
-            tie(k2_x, k2_y, k2_p) = kids[j];
+            int xi, yi, pi;
+            tie(xi, yi, pi) = kids[i];
 
-            if (can_pass(k1_x, k1_y, min(k1_p, k2_p), k2_x, k2_y)) {
-                adjacency_matrix[i][j] = true;
-                adjacency_matrix[j][i] = true;
+            int xj, yj, pj;
+            tie(xj, yj, pj) = kids[j];
+
+            if (can_pass(xi, yi, pi, xj, yj) && can_pass(xj, yj, pj, xi, yi)) {
+                adjacency_matrix[i][j] = adjacency_matrix[j][i] = true;
             }
         }
     }
+
     return adjacency_matrix;
 }
 
-void dfs() {
+void write_adjacency_matrix_to_file(const vector<vector<bool>>& adjacency_matrix, const string& filename) {
+    ofstream output(filename);
 
+    output << "Graph:" << endl;
+    for (const auto& row : adjacency_matrix) {
+        for (bool val : row) {
+            output << val << " ";
+        }
+        output << endl;
+    }
+
+    output.close();
 }
 
-void bfs() {
+void bfs(const vector<vector<bool>>& adjacency_matrix, int source, int target, const string& filename) {
+    int n = adjacency_matrix.size();
+    vector<bool> visited(n, false);
+    // vector<int> distance(n, -1);
+    int distance = -1;
+    vector<int> parent(n, -1);
 
+    queue<int> q;
+    visited[source] = true;
+    q.push(source);
+
+    while (!q.empty()) {
+        int current = q.front();
+        q.pop();
+
+        if (current == target) {
+            ofstream output(filename);
+
+            output << "BFS:" << endl;
+
+            stack<int> path;
+            for (int v = target; v != -1; v = parent[v]) {
+                path.push(v);
+                distance += 1;
+            }
+
+            output << distance << " ";
+
+            while (path.size() > 1) {
+                output << path.top() << "->";
+                path.pop();
+            }
+            output << path.top() << endl;
+            path.pop();
+
+            output.close();
+            return;
+        } else {
+            for (int i = 0; i < n; ++i) {
+                if (adjacency_matrix[current][i] && !visited[i]) {
+                    visited[i] = true;
+                    parent[i] = current;
+                    q.push(i);
+                }
+            }
+        }
+    }
+
+    return;
 }
+
+bool dfs_util(const vector<vector<bool>>& adjacency_matrix, int node, int target, vector<bool>& visited, vector<int>& path, bool is_start_node = true) {
+    if (!is_start_node) {
+        visited[node] = true;
+    }
+    path.push_back(node);
+
+    if (node == target && path.size() > 2) {
+        return true;
+    }
+
+    bool found_cycle = false;
+    for (int i = 0; i < adjacency_matrix.size(); ++i) {
+        if (adjacency_matrix[node][i] && (!visited[i] || (i == target && !is_start_node && path.size() > 2))) {
+            if (i == target && path.size() < 3) {
+                continue;
+            }
+            found_cycle = dfs_util(adjacency_matrix, i, target, visited, path, false);
+            if (found_cycle) {
+                break;
+            }
+        }
+    }
+
+    if (!found_cycle) {
+        path.pop_back();
+    }
+    visited[node] = false;
+
+    return found_cycle;
+}
+
+
+vector<int> dfs(const vector<vector<bool>>& adjacency_matrix, int source, const string& filename) {
+    int n = adjacency_matrix.size();
+    vector<bool> visited(n, false);
+    vector<int> path;
+
+    dfs_util(adjacency_matrix, source, source, visited, path);
+
+    ofstream output(filename);
+    output << "DFS:" << endl;
+
+    if (!path.empty()) {
+        output << (path.size() - 1) << " ";
+        for (int node : path) {
+            output << node << "->";
+        }
+        output.seekp(-2, output.cur);
+        output << "  " << endl;
+    } else {
+        output << "-1" << endl;
+    }
+
+    output.close();
+    return path;
+}
+
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
@@ -71,24 +187,15 @@ int main(int argc, char* argv[]) {
     input.close();
 
     vector<vector<bool>> adjacency_matrix = build_adjacency_matrix(kids);
-    cout << "Graph:" << endl;
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-            cout << adjacency_matrix[i][j] << " ";
-        }
-        cout << endl;
-    }
-    exit(0);
-}
 
-// int main(){
-//     /*
-//         INSERT ALL YOUR CODE IN HERE!
-//         Program Compile Command: g++ -std=c++11 -Wall -Werror main.cpp -o main
-//         Program Run Command: ./main <input.txt>
-//         Expected input: /graphs/case{$n}/input_{$n}.txt
-//         Expected output: graph.txt bfs.txt dfs.txt
-//         Please, try to write clean and readable code. Remember to comment!!
-//     */
-//     exit(0);
-// }
+    // Save adjacency matrix to a file
+    write_adjacency_matrix_to_file(adjacency_matrix, "graph.txt");
+
+    // 2.2 Breadth First Search
+    bfs(adjacency_matrix, source, target, "bfs.txt");
+
+    // 2.3 Depth First Search
+    vector<int> path = dfs(adjacency_matrix, source, "dfs.txt");
+
+    return 0;
+}
