@@ -3,7 +3,7 @@
     blocker: true
 
 - build:
-    run: g++ -std=c++11 -Wall -Werror main1.cpp -o main  # timeout: 2
+    run: g++ -std=c++11 -Wall -Werror main.cpp -o main  # timeout: 2
     blocker: true
 
 - case_run1:
@@ -26,7 +26,7 @@
     exit: 0
 
 - case_dfs1:
-    run: diff -rsZ graph.txt graphs/case1/dfs_1.txt
+    run: diff -rsZ dfs.txt graphs/case1/dfs_1.txt
     points: 2.1
     script:
         - expect: "Files dfs.txt and graphs/case1/dfs_1.txt are identical"
@@ -53,7 +53,7 @@
     exit: 0
 
 - case_dfs2:
-    run: diff -rsZ graph.txt graphs/case2/dfs_2.txt
+    run: diff -rsZ dfs.txt graphs/case2/dfs_2.txt
     points: 2.1
     script:
         - expect: "Files dfs.txt and graphs/case2/dfs_2.txt are identical"
@@ -80,7 +80,7 @@
     exit: 0
 
 - case_dfs3:
-    run: diff -rsZ graph.txt graphs/case3/dfs_3.txt
+    run: diff -rsZ dfs.txt graphs/case3/dfs_3.txt
     points: 2.1
     script:
         - expect: "Files dfs.txt and graphs/case3/dfs_3.txt are identical"
@@ -107,7 +107,7 @@
     exit: 0
 
 - case_dfs6:
-    run: diff -rsZ graph.txt graphs/case6/dfs_6.txt
+    run: diff -rsZ dfs.txt graphs/case6/dfs_6.txt
     points: 2.1
     script:
         - expect: "Files dfs.txt and graphs/case6/dfs_6.txt are identical"
@@ -134,7 +134,7 @@
     exit: 0
 
 - case_dfs7:
-    run: diff -rsZ graph.txt graphs/case7/dfs_7.txt
+    run: diff -rsZ dfs.txt graphs/case7/dfs_7.txt
     points: 2.1
     script:
         - expect: "Files dfs.txt and graphs/case7/dfs_7.txt are identical"
@@ -161,7 +161,7 @@
     exit: 0
 
 - case_dfs9:
-    run: diff -rsZ graph.txt graphs/case9/dfs_9.txt
+    run: diff -rsZ dfs.txt graphs/case9/dfs_9.txt
     points: 2.1
     script:
         - expect: "Files dfs.txt and graphs/case9/dfs_9.txt are identical"
@@ -188,7 +188,7 @@
     exit: 0
 
 - case_dfs11:
-    run: diff -rsZ graph.txt graphs/case11/dfs_11.txt
+    run: diff -rsZ dfs.txt graphs/case11/dfs_11.txt
     points: 2.1
     script:
         - expect: "Files dfs.txt and graphs/case11/dfs_11.txt are identical"
@@ -215,7 +215,7 @@
     exit: 0
 
 - case_dfs13:
-    run: diff -rsZ graph.txt graphs/case13/dfs_13.txt
+    run: diff -rsZ dfs.txt graphs/case13/dfs_13.txt
     points: 2.1
     script:
         - expect: "Files dfs.txt and graphs/case13/dfs_13.txt are identical"

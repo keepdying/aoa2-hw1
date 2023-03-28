@@ -4,7 +4,6 @@
 #include <fstream>
 #include <stack>
 #include <tuple>
-#include <algorithm>
 
 using namespace std;
 
@@ -55,9 +54,8 @@ void write_adjacency_matrix_to_file(const vector<vector<bool>>& adjacency_matrix
 void bfs(const vector<vector<bool>>& adjacency_matrix, int source, int target, const string& filename) {
     int n = adjacency_matrix.size();
     vector<bool> visited(n, false);
-    // vector<int> distance(n, -1);
-    int distance = -1;
     vector<int> parent(n, -1);
+    int distance = -1;
 
     queue<int> q;
     visited[source] = true;
@@ -103,88 +101,55 @@ void bfs(const vector<vector<bool>>& adjacency_matrix, int source, int target, c
     return;
 }
 
-bool dfs_util(const vector<vector<bool>>& adjacency_matrix, int node, int target, vector<bool>& visited, vector<int>& path, bool is_start_node = true, int depth = 1) {
-    if (depth > (int)adjacency_matrix.size()) {
-        return false;
-    }
+void dfs_util(const vector<vector<bool>>& adjacency_matrix, int node, int target, stack<pair<int, int>>& path) {
+    int n = adjacency_matrix.size();
+    vector<bool> visited(n, false);
 
-    if (!is_start_node) {
-        visited[node] = true;
-    }
-    path.push_back(node);
+    path.push({node, 0});
 
-    if (node == target && path.size() > 2) {
-        return true;
-    }
+    while (!path.empty()) {
+        int current_node = path.top().first;
+        int start_idx = path.top().second;
 
-    bool found_cycle = false;
-    if (adjacency_matrix[node][target] && path.size() > 2 && !is_start_node) {
-        path.push_back(target);
-        found_cycle = true;
-    } else {
-        for (int i = 0; i < (int)adjacency_matrix.size(); ++i) {
-            if (adjacency_matrix[node][i] && !visited[i]) {
-                if(i == target && path.size() < 3){
-                    continue;
-                }
-                found_cycle = dfs_util(adjacency_matrix, i, target, visited, path, false, depth + 1);
-                if (found_cycle) {
-                    break;
-                }
-            }
-        }
-    }
-
-    if (!found_cycle) {
-        path.pop_back();
-    }
-    visited[node] = false;
-
-    return found_cycle;
-}
-
-bool dfs_util_v2(const vector<vector<bool>>& adjacency_matrix, int node, int target, vector<bool>& visited, stack<pair<int, int>>& dfs_stack) {
-    dfs_stack.push({node, 0});
-
-    while (!dfs_stack.empty()) {
-        int current_node = dfs_stack.top().first;
-        int start_idx = dfs_stack.top().second;
-
-        if (adjacency_matrix[current_node][target] && dfs_stack.size() > 2) {
-            dfs_stack.push({target, 0});
-            return true;
+        if (adjacency_matrix[current_node][target] && path.size() > 2) {
+            path.push({target, 0});
+            return;
         }
         
-        dfs_stack.pop();
+        path.pop();
 
         visited[current_node] = true;
 
         for (int i = start_idx; i < (int)adjacency_matrix.size(); ++i) {
             if (adjacency_matrix[current_node][i] && !visited[i]) {
-                dfs_stack.push({current_node, i + 1});
-                dfs_stack.push({i, 0});
+                path.push({current_node, i + 1});
+                path.push({i, 0});
                 break;
             }
         }
     }
-
-    return false;
+    
+    return;
 }
 
 
-vector<int> dfs(const vector<vector<bool>>& adjacency_matrix, int source, const string& filename) {
-    int n = adjacency_matrix.size();
-    vector<bool> visited(n, false);
+void dfs(const vector<vector<bool>>& adjacency_matrix, int source, const string& filename) {
     vector<int> path;
     stack<pair<int, int>> dfs_stack;
 
-    dfs_util_v2(adjacency_matrix, source, source, visited, dfs_stack);
+    dfs_util(adjacency_matrix, source, source, dfs_stack);
 
     while (!dfs_stack.empty()) {
         path.push_back(dfs_stack.top().first);
         dfs_stack.pop();
     }
-    reverse(path.begin(), path.end());
+
+    int n = path.size();
+    for (int i = 0; i < n / 2; i++) {
+        int temp = path[i];
+        path[i] = path[n - i - 1];
+        path[n - i - 1] = temp;
+    }
 
     ofstream output(filename);
     output << "DFS:" << endl;
@@ -201,7 +166,6 @@ vector<int> dfs(const vector<vector<bool>>& adjacency_matrix, int source, const 
     }
 
     output.close();
-    return path;
 }
 
 
@@ -240,7 +204,7 @@ int main(int argc, char* argv[]) {
     bfs(adjacency_matrix, source, target, "bfs.txt");
 
     // 2.3 Depth First Search
-    vector<int> path = dfs(adjacency_matrix, source, "dfs.txt");
+    dfs(adjacency_matrix, source, "dfs.txt");
 
     return 0;
 }
