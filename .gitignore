@@ -31,3 +31,9 @@
 *.out
 *.app
 main
+
+bfs.txt
+dfs.txt
+graph.txt
+.DS_Store
+.vscode
